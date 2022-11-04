@@ -9,8 +9,21 @@ class JsonParserTest extends AnyFunSuite :
   import JsonParser.*
 
   test("Parse empty array") {
-    assert(parseArray("[]") == JsonArray(List.empty))
+    assert(parseArray("[]") == Right(JsonArray(List.empty)))
   }
 
+//  test("Parse empty array failure") {
+//    val input = "["
+//    assert(parseArray(input) == Left(ParseError(input, 1, expected = "]")))
+//  }
+
+  test("Parse token") {
+    assert(parseToken("[")("[") == Right(()))
+  }
+
+  test("Parse token failure") {
+    val input = "notTheStartArrayToken"
+    assert(parseToken("[")(input) == Left(ParseError(input, 0, expected = "[")))
+  }
 
 
