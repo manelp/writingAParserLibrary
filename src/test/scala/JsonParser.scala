@@ -10,9 +10,6 @@ object JsonParser:
     Right(position + s.substring(position).takeWhile(c => whiteSpaceChars.contains(c)).length)
 
   val array: Parser[JsonArray] =
-    (parseToken("[") ** whitespace ** parseToken("]"))
+    (string("[") ** whitespace ** string("]"))
       .map(_ => JsonArray(List.empty))
-
-  def parseToken(token: String): Parser[Int] = (s, position) =>
-    if (s.startsWith(token, position)) Right(position + token.length) else Left(ParseError(s, position, token))
 
