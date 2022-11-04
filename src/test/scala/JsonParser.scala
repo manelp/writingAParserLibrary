@@ -3,12 +3,12 @@ package com.agilogy.wapl
 import Json.JsonArray
 
 object JsonParser:
-  def parseArray(s: String): Either[ParseError, JsonArray] =
+  val array: Parser[JsonArray] = (s, position) =>
     for
-      _ <- parseToken("[")(s, 0)
-      _ <- parseToken("]")(s, 1)
+      _ <- parseToken("[")(s, position)
+      _ <- parseToken("]")(s, position + 1)
     yield JsonArray(List.empty)
 
-  def parseToken(token: String)(s: String, position: Int): Either[ParseError, Unit] =
+  def parseToken(token: String): Parser[Unit] = (s, position) =>
     if (s.startsWith(token, position)) Right(()) else Left(ParseError(s, position, token))
 
