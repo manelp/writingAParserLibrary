@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 type Parser[A] = (String, Int) => Either[ParseError, (Int, A)]
 
 def string(token: String): Parser[Unit] = (s, position) =>
-  if (s.startsWith(token, position)) Right((position + token.length, ())) else Left(ParseError(s, position, token))
+  if (s.startsWith(token, position)) Right((position + token.length, ())) else Left(ParseError(s, position, List(token)))
 
 def many[A](parser: Parser[A]): Parser[List[A]] = {
   @tailrec
@@ -20,18 +20,19 @@ extension[A](self: Parser[A])
   def map[B](f: A => B): Parser[B] = (s, position) =>
     self(s, position).map((pos, a) => (pos,f(a)))
   def as[B](v: B): Parser[B] = map(_ => v)
-  def |(other: Parser[A]): Parser[A] = (s, position) => self(s, position).orElse(other(s, position))
-  def *>[B](other: Parser[B]): Parser[B] = (s, position) =>
-    for
-      ia <- self(s, position)
-      ib <- other(s, ia._1)
-    yield ib
-  
+  def |(other: Parser[A]): Parser[A] = (s, position) => self(s, position) match
+    case ok @ Right(_) => ok
+    case Left(error) => other(s, position) match
+      case ok @ Right(_) => ok
+      case Left(secondError) => Left(ParseError(s, position, error.expected ++ secondError.expected))
 
-  def <*[B](other: Parser[B]): Parser[A] = (s, position) => 
+  def **[B](other: Parser[B]): Parser[(A,B)] = (s, position) =>
     for
       ia <- self(s, position)
       ib <- other(s, ia._1)
-    yield (ib._1, ia._2)
-    
+    yield (ib._1, (ia._2, ib._2))
+
+  def *>[B](other: Parser[B]): Parser[B] = (self ** other).map(_._2)
+  def <*[B](other: Parser[B]): Parser[A] = (self ** other).map(_._1)
+
   def * : Parser[List[A]] = many(self)

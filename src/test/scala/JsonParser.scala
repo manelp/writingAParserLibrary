@@ -4,10 +4,8 @@ import Json._
 
 object JsonParser:
 
-  private val whiteSpaceChars = Set(' ', '\n', '\r', '\t')
 
-  val whitespace: Parser[Unit] = (s, position) =>
-    Right((position + s.substring(position).takeWhile(c => whiteSpaceChars.contains(c)).length, ()))
+  val whitespace: Parser[Unit] = ((string(" ") | string("\n") | string("\r") | string("\t")).*).as(())
 
   private val trueBoolean: Parser[JsonBoolean] = string("true").as(JsonBoolean(true))
   private val falseBoolean: Parser[JsonBoolean] = string("false").as(JsonBoolean(false))

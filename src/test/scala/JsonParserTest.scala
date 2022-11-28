@@ -23,7 +23,7 @@ class JsonParserTest extends AnyFunSuite :
 
   test("Parse empty array failure") {
     val input = "["
-    assert(array(input, 0) == Left(ParseError(input, 1, expected = "]")))
+    assert(array(input, 0) == Left(ParseError(input, 1, expected = List("]"))))
   }
 
   test("Parse token") {
@@ -32,7 +32,7 @@ class JsonParserTest extends AnyFunSuite :
 
   test("Parse token failure") {
     val input = "notTheStartArrayToken"
-    assert(string("[")(input, 0) == Left(ParseError(input, 0, expected = "[")))
+    assert(string("[")(input, 0) == Left(ParseError(input, 0, expected = List("["))))
   }
 
     test("Parse boolean") {
@@ -46,6 +46,10 @@ class JsonParserTest extends AnyFunSuite :
 
   test("Parse array of booleans with spaces") {
     assert(array("[ true, false, true ]", 0) == Right((21,JsonArray(List(JsonBoolean(true),JsonBoolean(false),JsonBoolean(true))))))
+  }
+
+  test("Fail parsing a boolean gives a list of possible expected values") {
+    assert(boolean("A", 0) == Left(ParseError("A", 0, List("true", "false"))))
   }
 
 
