@@ -2,3 +2,7 @@ target/
 .idea/
 .bin/
 .bsp/
+.bloop
+.metals/
+.vscode/
+metals.sbt
